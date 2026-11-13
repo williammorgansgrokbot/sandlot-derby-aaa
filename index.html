@@ -71,43 +71,60 @@ html, body {
   display: block;
   touch-action: none;
 }
-#ui { position: absolute; inset: 0; overflow: hidden; }
+#ui { position: absolute; inset: 0; overflow: hidden; z-index: 3; }
 .screen {
   position: absolute;
   inset: 0;
-  display: none;
+  display: flex;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 1;
+  transform: translateY(16px);
   padding: calc(10px + var(--sat)) calc(12px + var(--sar)) calc(12px + var(--sab)) calc(12px + var(--sal));
+  transition: opacity 0.38s ease, transform 0.46s cubic-bezier(0.22, 0.82, 0.24, 1), visibility 0s linear 0.38s;
 }
-.screen.on { display: flex; }
+.screen.on {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 2;
+  transform: none;
+  transition: opacity 0.38s ease, transform 0.46s cubic-bezier(0.22, 0.82, 0.24, 1), visibility 0s linear 0s;
+}
 button, .card { font-family: inherit; }
 
 .btn {
   appearance: none;
-  border: 3px solid var(--ink);
-  background: linear-gradient(#fff6b0, #f3b51c);
+  border: none;
+  background: url("art/ui_button.png") center / 100% 100% no-repeat;
   color: var(--ink);
   font-weight: 700;
   font-size: 20px;
   letter-spacing: 0.3px;
-  border-radius: 18px;
-  padding: 12px 18px;
-  min-height: 52px;
-  box-shadow: 0 4px 0 var(--ink);
+  border-radius: 999px;
+  padding: 12px 20px 16px;
+  min-height: 54px;
+  box-shadow: none;
   cursor: pointer;
+  text-shadow: 0 1px 0 rgba(255, 246, 176, 0.45);
+  transition: transform 0.12s ease, filter 0.12s ease;
 }
-.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--ink); }
-.btn.wood {
-  background: linear-gradient(#e9c97e, #c98a4b);
-}
+.btn:active { transform: translateY(2px) scale(0.985); filter: brightness(0.96); }
+.btn.wood { filter: saturate(0.92) hue-rotate(-12deg); }
+.btn.wood:active { filter: saturate(0.92) hue-rotate(-12deg) brightness(0.96); }
 .btn.ghost {
-  background: #fff4cf;
+  background: rgba(255, 244, 207, 0.96);
+  border: 3px solid var(--ink);
   font-size: 16px;
-  min-height: 44px;
+  min-height: 48px;
+  padding: 8px 16px;
+  text-shadow: none;
+  box-shadow: 0 3px 0 var(--ink);
 }
 .btn.soon {
-  background: linear-gradient(#fff4cf, #e9c97e);
   font-size: 15px;
-  min-height: 46px;
+  min-height: 50px;
   position: relative;
 }
 .btn:disabled { opacity: 0.55; }
@@ -126,25 +143,25 @@ button, .card { font-family: inherit; }
 
 /* loading + title */
 #loading {
-  background: #fff4cf;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255, 214, 120, 0.55), transparent 46%),
+    #fff4cf url("art/tex_dirt.jpg") center/280px repeat;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   text-align: center;
   z-index: 5;
+  transform: none;
 }
-.logo-mark {
-  font-size: 42px;
-  font-weight: 700;
-  line-height: 0.9;
-  color: #fff6b0;
-  -webkit-text-stroke: 6px var(--ink);
-  paint-order: stroke fill;
-  text-shadow: 0 4px 0 rgba(58, 29, 8, 0.25);
+.load-logo {
+  width: min(420px, 78vw);
+  height: auto;
+  max-height: 34vh;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 0 rgba(58, 29, 8, 0.18));
 }
-.logo-sub { margin-top: 8px; font-weight: 600; color: var(--brown); font-size: 16px; }
 .bar {
-  margin-top: 22px;
+  margin-top: 18px;
   width: min(280px, 70vw);
   height: 18px;
   border: 3px solid var(--ink);
@@ -157,33 +174,38 @@ button, .card { font-family: inherit; }
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #ffd34d, #ff6040);
+  transition: width 0.18s ease;
 }
-#loading p { font-weight: 600; color: var(--brown); }
+#loading p { font-weight: 600; color: var(--brown); margin: 10px 0 0; }
 
 #title {
   padding: 0;
-  display: none;
   flex-direction: column;
 }
-#title.on { display: flex; }
 .title-bg {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -3%;
+  width: 106%;
+  height: 106%;
   object-fit: cover;
-  object-position: center 40%;
+  object-position: center 42%;
+  animation: ken 22s ease-in-out infinite alternate;
+}
+@keyframes ken {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.055) translate3d(-1.2%, -0.6%, 0); }
 }
 .title-shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(58, 29, 8, 0.18), rgba(58, 29, 8, 0) 28%, rgba(58, 29, 8, 0) 62%, rgba(58, 29, 8, 0.28));
+  background: linear-gradient(to bottom, rgba(58, 29, 8, 0.12), rgba(58, 29, 8, 0) 30%, rgba(58, 29, 8, 0) 58%, rgba(58, 29, 8, 0.34));
   pointer-events: none;
 }
 .title-inner {
   position: relative;
   z-index: 1;
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -191,28 +213,14 @@ button, .card { font-family: inherit; }
 }
 .title-logo {
   text-align: center;
-  margin-top: 4px;
+  margin-top: 2px;
 }
-.title-logo h1 {
-  margin: 0;
-  font-size: clamp(34px, 8vw, 64px);
-  line-height: 0.86;
-  font-weight: 700;
-  color: #fff6b0;
-  -webkit-text-stroke: 7px var(--ink);
-  paint-order: stroke fill;
-  letter-spacing: 0.5px;
-}
-.title-logo p {
-  margin: 6px 0 0;
-  font-weight: 700;
-  color: var(--ink);
-  background: rgba(255, 246, 176, 0.88);
-  display: inline-block;
-  border: 3px solid var(--ink);
-  border-radius: 999px;
-  padding: 2px 12px;
-  font-size: 14px;
+.game-logo {
+  width: min(520px, 86vw);
+  height: auto;
+  max-height: min(34vh, 280px);
+  object-fit: contain;
+  filter: drop-shadow(0 8px 0 rgba(58, 29, 8, 0.22));
 }
 .title-actions {
   display: flex;
@@ -257,11 +265,12 @@ button, .card { font-family: inherit; }
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 244, 207, 0.92);
-  border: 4px solid var(--ink);
-  border-radius: 24px;
-  padding: 12px;
-  box-shadow: 0 6px 0 rgba(58, 29, 8, 0.25);
+  background: none;
+  border: 32px solid transparent;
+  border-image: url("art/ui_panel.png") 128 fill / 32px / 0 stretch;
+  border-radius: 0;
+  padding: 4px 8px 8px;
+  box-shadow: none;
 }
 .panel h2 {
   margin: 0 0 4px;
@@ -332,13 +341,14 @@ button, .card { font-family: inherit; }
 /* handoff + results */
 #handoff { justify-content: center; }
 .handoff-card, .results-card {
-  width: min(520px, 100%);
-  background: #fff4cf;
-  border: 4px solid var(--ink);
-  border-radius: 28px;
-  padding: 18px 16px;
+  width: min(540px, 100%);
+  background: none;
+  border: 34px solid transparent;
+  border-image: url("art/ui_panel.png") 128 fill / 34px / 0 stretch;
+  border-radius: 0;
+  padding: 6px 10px 8px;
   text-align: center;
-  box-shadow: 0 8px 0 rgba(58, 29, 8, 0.2);
+  box-shadow: none;
 }
 .handoff-bust {
   width: 120px;
@@ -350,7 +360,18 @@ button, .card { font-family: inherit; }
 }
 .big-score { font-size: 52px; font-weight: 700; line-height: 0.95; }
 .big-score span { font-size: 22px; }
+.big-score.tick { animation: scorepop 0.28s ease; }
 .star-line { font-size: 34px; color: #e0a000; letter-spacing: 4px; margin: 4px 0; }
+.star-line i { display: inline-block; opacity: 0; transform: scale(0.4); }
+.star-line i.in { animation: starp 0.38s cubic-bezier(0.2, 1.3, 0.4, 1) forwards; }
+@keyframes scorepop {
+  0% { transform: scale(0.86); }
+  55% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+@keyframes starp {
+  to { opacity: 1; transform: scale(1); }
+}
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; text-align: left; }
 .stat-pill {
   background: #fff;
@@ -372,15 +393,19 @@ button, .card { font-family: inherit; }
   margin: 0 auto;
   display: block;
 }
+.buddy.bounce { animation: buddy 1.1s ease-in-out infinite; }
+@keyframes buddy {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
 
 /* HUD */
 #hud {
-  display: none;
-  pointer-events: auto;
+  pointer-events: none;
   flex-direction: column;
   justify-content: flex-start;
 }
-#hud.on { display: flex; }
+#hud.on { pointer-events: auto; }
 #hud * { pointer-events: none; }
 #hud button, #hud .aim { pointer-events: auto; }
 .hud-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
@@ -450,12 +475,13 @@ button, .card { font-family: inherit; }
   display: inline-flex;
   align-items: baseline;
   gap: 4px;
-  background: linear-gradient(#ffe27a, #f3b51c);
-  border: 3px solid var(--ink);
-  border-radius: 18px;
-  padding: 4px 14px 5px;
-  box-shadow: 0 3px 0 var(--ink);
+  background: url("art/ui_button.png") center / 100% 100% no-repeat;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 18px 10px;
+  box-shadow: none;
 }
+.score-pill.bump { animation: scorepop 0.32s ease; }
 .score-pill strong { font-size: 32px; line-height: 1; }
 .score-pill em { font-style: normal; font-weight: 700; font-size: 16px; }
 .combo-chip {
@@ -633,9 +659,28 @@ button, .card { font-family: inherit; }
 @keyframes fall {
   to { transform: translateY(110vh) rotate(240deg); opacity: 0.85; }
 }
+#vignette, #grade, #flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#vignette {
+  z-index: 1;
+  background: radial-gradient(ellipse at 50% 42%, transparent 48%, rgba(48, 22, 8, 0.32) 100%);
+}
+#grade {
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(255, 196, 110, 0.16), transparent 34%, transparent 70%, rgba(120, 62, 18, 0.14));
+  mix-blend-mode: soft-light;
+}
+#flash {
+  z-index: 4;
+  background: #fff4cf;
+  opacity: 0;
+}
 @media (orientation: portrait) {
   .roster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .title-logo h1 { font-size: clamp(40px, 12vw, 68px); }
+  .game-logo { width: min(360px, 88vw); max-height: 30vh; }
   .bust-wrap { width: 54px; height: 54px; }
   .card { padding: 4px 4px 6px; }
   .card .nm { font-size: 15px; }
@@ -679,7 +724,10 @@ button, .card { font-family: inherit; }
   .panel { padding: 8px 10px; }
   .panel h2 { font-size: 22px; }
   .panel .lead { margin: 0 0 4px; font-size: 13px; }
-  .title-logo h1 { font-size: 36px; -webkit-text-stroke: 5px var(--ink); }
+  .game-logo { width: min(240px, 40vw); max-height: 24vh; }
+  .load-logo { width: min(260px, 46vw); max-height: 28vh; }
+  .panel { border-width: 18px; border-image-width: 18px; padding: 2px 6px 4px; }
+  .handoff-card, .results-card { border-width: 18px; border-image-width: 18px; padding: 2px 8px 4px; }
   .handoff-bust { width: 72px; height: 72px; }
   .big-score { font-size: 32px; }
   .star-line { font-size: 20px; margin: 0; }
@@ -693,7 +741,15 @@ button, .card { font-family: inherit; }
   .results-actions .btn { flex: 1; }
 }
 @media (max-width: 420px) and (orientation: portrait) {
-  .detail { flex-direction: column; align-items: stretch; }
+  .panel { border-width: 20px; border-image-width: 20px; padding: 2px 4px 4px; }
+  .bust-wrap { width: 46px; height: 46px; }
+  .card { padding: 3px 3px 4px; }
+  .card .nm { font-size: 14px; }
+  .card .stars { font-size: 12px; }
+  .card .perk { font-size: 10px; line-height: 1.15; }
+  .roster-grid { gap: 6px; }
+  .detail { margin-top: 4px; gap: 6px; }
+  .stats { font-size: 11px; gap: 4px 8px; }
   .hud-tools { gap: 4px; }
   .pitch-bubble { font-size: 13px; padding: 6px 8px; }
 }
@@ -701,11 +757,14 @@ button, .card { font-family: inherit; }
 </head>
 <body>
 <canvas id="view"></canvas>
+<div id="vignette"></div>
+<div id="grade"></div>
+<div id="flash"></div>
 <img id="bonk" alt="" src="art/fx_bonk.png" draggable="false">
 <div id="ui">
   <section id="loading" class="screen on">
-    <div class="logo-mark">SANDLOT</div>
-    <p>Warming up the field…</p>
+    <img class="load-logo" alt="" src="art/logo.png">
+    <p id="load-label">Warming up the field…</p>
     <div class="bar" aria-hidden="true"><i id="load-bar"></i></div>
   </section>
 
@@ -717,8 +776,7 @@ button, .card { font-family: inherit; }
     </div>
     <div class="title-inner">
       <div class="title-logo">
-        <h1>SANDLOT<br>HOME RUN<br>DERBY</h1>
-        <p>a backyard derby</p>
+        <img class="game-logo" alt="Sandlot Home Run Derby" src="art/logo.png">
       </div>
       <div class="title-actions">
         <button class="btn" id="go-derby" type="button">PLAY DERBY</button>
@@ -788,7 +846,7 @@ button, .card { font-family: inherit; }
       </div>
     </div>
     <div class="score-wrap">
-      <div class="score-pill"><strong id="hud-score">0</strong><em>ft</em></div>
+      <div class="score-pill" id="score-pill"><strong id="hud-score">0</strong><em>ft</em></div>
       <div><span class="combo-chip" id="hud-combo">x2 COMBO</span></div>
     </div>
     <div class="bottom-cluster">
@@ -826,7 +884,7 @@ button, .card { font-family: inherit; }
   </div>
   <div id="soon">
     <div class="handoff-card">
-      <img class="buddy" alt="" src="art/dog_sit.png">
+      <img class="buddy bounce" alt="" src="art/dog_sit.png">
       <h2 id="soon-title">Coming soon</h2>
       <p class="lead" id="soon-lead">Biscuit is still building this one.</p>
       <button class="btn" id="soon-ok" type="button">OK</button>
@@ -1369,6 +1427,10 @@ button, .card { font-family: inherit; }
   var bases = [];
   var particles = [];
   var dustTex, sparkTex, shadowTex;
+  var dustFrames = [];
+  var crowd, godrays, plateDecal, haze;
+  var shadowBatter, shadowPitcher, shadowDog, shadowBall;
+  var punch = new THREE.Vector3();
   var gradMap;
   var outlineMat;
   var camBase = new THREE.Vector3();
@@ -1408,8 +1470,11 @@ button, .card { font-family: inherit; }
           tex.wrapT = THREE.ClampToEdgeWrapping;
         }
         state.loaded++;
+        var pct = Math.round(100 * state.loaded / Math.max(1, state.total));
         var bar = el("load-bar");
-        if (bar) bar.style.width = Math.round(100 * state.loaded / state.total) + "%";
+        if (bar) bar.style.width = pct + "%";
+        var label = el("load-label");
+        if (label) label.textContent = "Warming up the field… " + pct + "%";
         resolve(tex);
       };
       img.onerror = function () { reject(new Error("Missing art: " + url)); };
@@ -1466,6 +1531,7 @@ button, .card { font-family: inherit; }
     var aspect = img.width / img.height;
     s.scale.set(height * aspect, height, 1);
     s.userData.baseH = height;
+    s.userData.aspect = aspect;
     return s;
   }
 
@@ -1474,6 +1540,7 @@ button, .card { font-family: inherit; }
     var aspect = img.width / Math.max(1, img.height);
     s.scale.set(height * aspect, height, 1);
     s.userData.baseH = height;
+    s.userData.aspect = aspect;
     s.material.map = tex;
     s.material.needsUpdate = true;
   }
@@ -1612,7 +1679,7 @@ button, .card { font-family: inherit; }
     renderer.setClearColor(0xf6c98a, 1);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
     scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xf3c48e, 26, 58);
+    scene.fog = new THREE.Fog(0xf6c48a, 20, 50);
     camera = new THREE.PerspectiveCamera(40, 1, 0.1, 140);
 
     gradMap = makeGrad();
@@ -1693,7 +1760,44 @@ button, .card { font-family: inherit; }
 
     tree = plane(textures.tree, 7.2, 8.6);
     tree.position.set(-5.2, 4.15, -16.55);
+    tree.userData.base = tree.position.clone();
     scene.add(tree);
+
+    crowd = plane(textures.crowd, 9.4, 2.58);
+    crowd.position.set(0.15, 1.52, -16.85);
+    crowd.userData.base = crowd.position.clone();
+    crowd.userData.baseW = 9.4;
+    crowd.userData.baseH = 2.58;
+    crowd.material.alphaTest = 0.18;
+    crowd.material.depthWrite = true;
+    scene.add(crowd);
+
+    godrays = plane(textures.rays, 24, 13.5);
+    godrays.position.set(-5.5, 11.2, -30);
+    godrays.material.alphaTest = 0.02;
+    godrays.material.depthWrite = false;
+    godrays.material.opacity = 0.48;
+    godrays.renderOrder = -1;
+    scene.add(godrays);
+
+    plateDecal = plane(textures.plate, 4.2, 2.54);
+    plateDecal.rotation.x = -Math.PI / 2;
+    plateDecal.position.set(-0.2, 0.055, 1.45);
+    plateDecal.material.alphaTest = 0.12;
+    plateDecal.material.depthWrite = false;
+    plateDecal.renderOrder = 1;
+    scene.add(plateDecal);
+
+    haze = plane(textures.dust2, 30, 7.5);
+    haze.position.set(0.4, 2.2, -11.5);
+    haze.material.alphaTest = 0.01;
+    haze.material.depthWrite = false;
+    haze.material.opacity = 0.13;
+    haze.material.color = new THREE.Color("#f6c98a");
+    scene.add(haze);
+
+    houses.userData.base = houses.position.clone();
+    skyDay.userData.baseX = skyDay.position.x;
 
     dog = spriteBillboard(textures.dogIdle, 3.25);
     dog.position.set(3.45, 1.72, -14.35);
@@ -1701,8 +1805,8 @@ button, .card { font-family: inherit; }
     scene.add(dog);
 
     var yardSpec = [
-      { id: "stormy", h: 2.55, pad: 17 / 731, keys: ["stormy1", "stormy2", "stormy3"], peek: "stormyPeek" },
-      { id: "emma", h: 2.8, pad: 16 / 826, keys: ["emma1", "emma2", "emma3"], peek: "emmaPeek" }
+      { id: "stormy", h: 2.32, pad: 0.030, footU: [0.376, 0.463, 0.317], keys: ["stormy1", "stormy2", "stormy3"], peek: "stormyPeek" },
+      { id: "emma", h: 2.48, pad: 0.024, footU: [0.415, 0.428, 0.310], keys: ["emma1", "emma2", "emma3"], peek: "emmaPeek" }
     ];
     yardRunners = [];
     for (var yi = 0; yi < yardSpec.length; yi++) {
@@ -1787,21 +1891,24 @@ button, .card { font-family: inherit; }
 
     function blob(x, z, sx, sz) {
       var m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
-        map: shadowTex, transparent: true, depthWrite: false, fog: false
+        map: shadowTex, transparent: true, depthWrite: false, fog: false, opacity: 0.85
       }));
       m.rotation.x = -Math.PI / 2;
-      m.position.set(x, 0.045, z);
+      m.position.set(x, 0.048, z);
       m.scale.set(sx, sz, 1);
+      m.renderOrder = 1;
       scene.add(m);
       return m;
     }
-    blob(-0.95, 2.15, 1.8, 1.1);
-    blob(0.85, -5.2, 1.3, 0.8);
-    blob(3.45, -14.2, 2.4, 1.1);
+    shadowBatter = blob(-0.95, 2.15, 1.7, 0.95);
+    shadowPitcher = blob(0.85, -5.2, 1.15, 0.7);
+    shadowDog = blob(3.45, -14.2, 2.2, 0.95);
+    shadowBall = blob(0, 0, 0.55, 0.36);
+    shadowBall.visible = false;
 
-    hemi = new THREE.HemisphereLight(0xfff1cc, 0xc98a4b, 0.72);
+    hemi = new THREE.HemisphereLight(0xfff1cc, 0xc98a4b, 0.78);
     scene.add(hemi);
-    sun = new THREE.DirectionalLight(0xffd79a, 1.05);
+    sun = new THREE.DirectionalLight(0xffc56a, 1.18);
     sun.position.set(-12, 16, 8);
     scene.add(sun);
     fill = new THREE.DirectionalLight(0xfff6e0, 0.38);
@@ -1815,7 +1922,8 @@ button, .card { font-family: inherit; }
       winLights.push(pl);
     }
 
-    for (var p = 0; p < 84; p++) {
+    dustFrames = [textures.dust1, textures.dust2, textures.dust3, textures.dust4];
+    for (var p = 0; p < 96; p++) {
       var mat = new THREE.SpriteMaterial({
         map: dustTex, transparent: true, depthWrite: false, fog: false, opacity: 0
       });
@@ -1906,11 +2014,36 @@ button, .card { font-family: inherit; }
   function puff(pos, n, color, speed, size) {
     for (var i = 0; i < n; i++) {
       var vel = new THREE.Vector3((Math.random() - 0.5) * speed, Math.random() * speed * 0.8, (Math.random() - 0.5) * speed);
+      var tex = dustFrames.length ? dustFrames[(Math.random() * dustFrames.length) | 0] : dustTex;
       spawnParticle(pos.clone(), {
-        vel: vel, life: 0.45 + Math.random() * 0.35, size: size * (0.6 + Math.random()),
-        color: color, grav: 1.2, drag: 0.92, tex: dustTex, grow: 0.4
+        vel: vel, life: 0.45 + Math.random() * 0.35, size: size * (0.85 + Math.random() * 0.7),
+        color: color, grav: 0.6, drag: 0.92, tex: tex, grow: 0.55
       });
     }
+  }
+  function burstSpark(pos) {
+    if (!textures.spark) return;
+    spawnParticle(pos.clone(), {
+      vel: new THREE.Vector3(0, 0.2, 0),
+      life: 0.28,
+      size: 1.25,
+      color: "#fff6c2",
+      grav: 0,
+      drag: 1,
+      tex: textures.spark,
+      additive: true,
+      grow: 0.9
+    });
+  }
+  function flashHit(power) {
+    var n = el("flash");
+    if (!n) return;
+    n.style.transition = "none";
+    n.style.opacity = String(power || 0.22);
+    requestAnimationFrame(function () {
+      n.style.transition = "opacity 0.34s ease";
+      n.style.opacity = "0";
+    });
   }
   function sparkle(pos, n, color) {
     for (var i = 0; i < n; i++) {
@@ -2001,16 +2134,20 @@ button, .card { font-family: inherit; }
     }
   }
 
-  function paintYardSprite(r, map, h, y) {
+  function paintYardSprite(r, map, h, y, footU) {
     if (r.sprite.material.map !== map) {
       r.sprite.material.map = map;
       r.sprite.material.needsUpdate = true;
     }
     var img = map.image;
     var aspect = img.width / Math.max(1, img.height);
-    r.sprite.scale.set(h * aspect, h, 1);
-    r.sprite.position.set(r.x, y, YARD_Z);
+    var sprW = h * aspect;
+    var x = r.x;
+    if (footU != null) x = r.x - (footU - 0.5) * sprW;
+    r.sprite.scale.set(sprW, h, 1);
+    r.sprite.position.set(x, y, YARD_Z);
     r.sprite.visible = true;
+    r.drawX = x;
   }
 
   function showYardRun(r) {
@@ -2019,13 +2156,15 @@ button, .card { font-family: inherit; }
     var map = r.dir < 0 ? r.flips[fi] : r.frames[fi];
     var h = r.spec.h;
     var y = yardFeetY(h, r.spec.pad) + Math.sin(r.frameT * 22) * 0.03;
-    paintYardSprite(r, map, h, y);
+    var footU = (r.spec.footU && r.spec.footU[fi] != null) ? r.spec.footU[fi] : 0.5;
+    if (r.dir < 0) footU = 1 - footU;
+    paintYardSprite(r, map, h, y, footU);
   }
 
   function showYardPeek(r) {
     var h = r.spec.id === "emma" ? 3.15 : 2.86;
     var y = 0.12 + h * 0.5 + Math.sin(state.real * 2.4) * 0.03;
-    paintYardSprite(r, r.peek, h, y);
+    paintYardSprite(r, r.peek, h, y, 0.5);
   }
 
   function startYardRun(index, dir, x, speed, stopX) {
@@ -2205,7 +2344,9 @@ button, .card { font-family: inherit; }
     yardHoldX: null,
     yardCount: 0,
     yardNext: 3,
-    real: 0
+    real: 0,
+    cheer: 0,
+    lastTarget: 0
   };
 
   var api = {
@@ -2279,6 +2420,8 @@ button, .card { font-family: inherit; }
     state.gap = 0;
     shownScore = 0;
     state.scoreShown = 0;
+    state.lastTarget = 0;
+    state.cheer = 0;
     ui.aim = "center";
     resetField();
     applyBatter(p.kid);
@@ -2378,7 +2521,8 @@ button, .card { font-family: inherit; }
     var safeB = h - inset.sab;
     var safeW = Math.max(48, safeR - safeL);
     var safeH = Math.max(48, safeB - safeT);
-    var aspect = 1024 / 886;
+    var bonkImg = el("bonk");
+    var aspect = (bonkImg && bonkImg.naturalWidth) ? (bonkImg.naturalWidth / bonkImg.naturalHeight) : (1102 / 839);
     var peak = 1.18;
     var tilt = 8 * Math.PI / 180;
     var cos = Math.cos(tilt);
@@ -2549,8 +2693,9 @@ button, .card { font-family: inherit; }
     var kid = p.kid;
     sfxCrack();
     buzz(18);
-    puff(platePoint(), 10, "#e7c49a", 2.2, 0.32);
+    puff(platePoint(), 7, "#ffffff", 1.5, 1.05);
     sparkle(platePoint(), 8, "#fff6b0");
+    if (result.kind !== "miss") burstSpark(platePoint());
 
     if (result.kind === "miss" || result.kind === "foul") {
       p.swings[state.swing] = result.kind;
@@ -2559,6 +2704,11 @@ button, .card { font-family: inherit; }
       el("hud-combo").classList.remove("show");
       var line = result.kind === "foul" ? pick(FOUL_LINES) : pick(MISS_LINES);
       showCallout(line, "Keep swinging!", true);
+      if (result.kind === "foul") {
+        punch.set(0.03, 0.04, 0.06);
+        shakeMag = Math.max(shakeMag, 0.1);
+        flashHit(0.12);
+      }
       startFoulFlight(result.kind === "foul");
       noteYardPitch(false, false, 0);
       return;
@@ -2616,11 +2766,17 @@ button, .card { font-family: inherit; }
     }
     if (learned) sub += learned;
     showCallout(title, sub, !isHr);
+    punch.set((Math.random() - 0.5) * 0.05, juicy ? 0.11 : 0.06, juicy ? 0.18 : 0.1);
+    shakeMag = Math.max(shakeMag, juicy ? 0.26 : 0.14);
+    flashHit(juicy ? 0.4 : 0.18);
+    state.cheer = Math.max(state.cheer, juicy ? 1.35 : 0.4);
     if (isHr) {
       sfxCheer();
       buzz([18, 40, 28]);
       confetti();
-      shakeMag = Math.max(shakeMag, result.feet >= 360 ? 0.16 : 0.08);
+      shakeMag = Math.max(shakeMag, result.feet >= 360 ? 0.36 : 0.22);
+      punch.y = Math.max(punch.y, 0.14);
+      punch.z = Math.max(punch.z, 0.24);
       if (result.feet >= 360 || p.streak >= 3) setNight(true, true);
     }
     if (mult >= 2) {
@@ -2646,7 +2802,7 @@ button, .card { font-family: inherit; }
     }
 
     var big = isHr && result.feet >= 340;
-    state.hitStop = big ? 0.07 : 0.045;
+    state.hitStop = big ? 0.09 : 0.05;
     state.flight = {
       t: 0,
       dur: (state.fast || api.fast) ? 0.42 : (1.05 + Math.min(result.feet, 480) / 420),
@@ -2797,8 +2953,12 @@ button, .card { font-family: inherit; }
         var track = document.createElement("div");
         track.className = "track";
         var fill = document.createElement("i");
-        fill.style.width = (best ? Math.max(8, ordered[j].score / best * 100) : 8) + "%";
+        fill.style.width = "0%";
         fill.style.background = ordered[j].kid.color;
+        fill.style.transition = "width 0.75s cubic-bezier(0.2, 0.8, 0.2, 1)";
+        (function (node, w) {
+          requestAnimationFrame(function () { node.style.width = w; });
+        })(fill, (best ? Math.max(8, ordered[j].score / best * 100) : 8) + "%");
         track.appendChild(fill);
         var num = document.createElement("div");
         num.textContent = fmt(ordered[j].score);
@@ -2817,7 +2977,7 @@ button, .card { font-family: inherit; }
       card.appendChild(note);
     }
     var buddy = document.createElement("img");
-    buddy.className = "buddy";
+    buddy.className = "buddy bounce";
     buddy.alt = "";
     buddy.src = "art/dog_sit.png";
     card.appendChild(buddy);
@@ -2848,6 +3008,26 @@ button, .card { font-family: inherit; }
     card.appendChild(actions);
   }
 
+  function animateResultScore(node, score, starLine) {
+    var start = performance.now();
+    var dur = 980;
+    var stars = starLine ? starLine.querySelectorAll("i") : [];
+    for (var i = 0; i < stars.length; i++) {
+      (function (star, delay) {
+        setTimeout(function () { star.className = "in"; }, delay);
+      })(stars[i], 140 + i * 120);
+    }
+    function tick(now) {
+      var t = clamp((now - start) / dur, 0, 1);
+      var e = 1 - Math.pow(1 - t, 3);
+      if (ui.screen !== "results") return;
+      node.innerHTML = fmt(score * e) + " <span>ft</span>";
+      if (t < 1) requestAnimationFrame(tick);
+      else node.innerHTML = fmt(score) + " <span>ft</span>";
+    }
+    requestAnimationFrame(tick);
+  }
+
   function resultBlock(p, withStars) {
     var wrap = document.createElement("div");
     var stars = 2;
@@ -2857,15 +3037,18 @@ button, .card { font-family: inherit; }
     if (withStars) {
       var line = document.createElement("div");
       line.className = "star-line";
-      var s = "";
-      for (var i = 1; i <= 5; i++) s += i <= stars ? "★" : "☆";
-      line.textContent = s;
+      for (var i = 1; i <= 5; i++) {
+        var star = document.createElement("i");
+        star.textContent = i <= stars ? "★" : "☆";
+        line.appendChild(star);
+      }
       wrap.appendChild(line);
     }
     var big = document.createElement("div");
     big.className = "big-score";
-    big.innerHTML = fmt(p.score) + " <span>ft</span>";
+    big.innerHTML = "0 <span>ft</span>";
     wrap.appendChild(big);
+    animateResultScore(big, p.score, line);
     var grid = document.createElement("div");
     grid.className = "stat-grid";
     var bits = [
@@ -3008,11 +3191,11 @@ button, .card { font-family: inherit; }
       ballRoot.visible = true;
       ballSphere.rotation.x += dt * 8;
       ballSphere.rotation.z += dt * 4;
-      if (Math.random() < 0.8) {
+      if (Math.random() < (f.hr ? 0.95 : 0.72)) {
         spawnParticle(bp.clone(), {
-          vel: new THREE.Vector3(0, 0, 0),
-          life: 0.28,
-          size: f.hr ? 0.34 : 0.22,
+          vel: new THREE.Vector3((Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.1, 0),
+          life: f.hr ? 0.42 : 0.26,
+          size: f.hr ? 0.46 : 0.24,
           color: f.hr ? "#ffd34d" : pInfo.color,
           grav: 0,
           drag: 1,
@@ -3037,6 +3220,15 @@ button, .card { font-family: inherit; }
 
     var target = currentPlayer() ? currentPlayer().score : 0;
     if (ui.screen === "hud") {
+      if (target > (state.lastTarget || 0)) {
+        var pill = el("score-pill");
+        if (pill) {
+          pill.classList.remove("bump");
+          void pill.offsetWidth;
+          pill.classList.add("bump");
+        }
+      }
+      state.lastTarget = target;
       shownScore = lerp(shownScore, target, 1 - Math.pow(0.001, realDt));
       if (Math.abs(shownScore - target) < 1) shownScore = target;
       el("hud-score").textContent = fmt(shownScore);
@@ -3059,13 +3251,14 @@ button, .card { font-family: inherit; }
     }
     for (var i = 0; i < winLights.length; i++) winLights[i].intensity = nightK * 2.2;
 
-    if (pitcher && state.phase !== "flight") {
-      pitcher.position.y = (pitcher.userData.baseH || 2.45) / 2 + Math.sin(state.real * 2.2) * 0.035;
-    }
+    if (pitcher) posePitcher(realDt);
     if (dog && state.dogTimer <= 0) {
-      dog.position.y = 1.72 + Math.sin(state.real * 1.7) * 0.04;
+      dog.position.y = 1.72 + Math.sin(state.real * 1.7) * 0.045;
       dog.position.x = 3.45;
     }
+    if (state.cheer > 0) state.cheer = Math.max(0, state.cheer - realDt * 0.55);
+    updateShadows();
+    applyParallax();
     updateYard(realDt);
     for (var w = 0; w < windows.length; w++) {
       var win = windows[w];
@@ -3125,18 +3318,20 @@ button, .card { font-family: inherit; }
     if (state.flight && ballRoot.visible) {
       var f = state.flight;
       var lift = clamp(ballRoot.position.y / 6, 0, 1);
-      wantLook.lerp(ballRoot.position, f.hr ? 0.42 : 0.26);
-      wantPos.y += lift * (f.big ? 1.35 : 0.7);
-      wantPos.z += lift * 0.35;
-      wantPos.x += ballRoot.position.x * 0.08;
+      var follow = f.big ? 0.64 : (f.hr ? 0.48 : 0.26);
+      wantLook.lerp(ballRoot.position, follow);
+      wantPos.y += lift * (f.big ? 2.15 : 0.7);
+      wantPos.z += lift * (f.big ? 1.35 : 0.35);
+      wantPos.x += ballRoot.position.x * (f.big ? 0.24 : 0.08);
     }
     var k = 1 - Math.pow(0.0008, realDt);
     camPos.lerp(wantPos, k);
     lookPos.lerp(wantLook, k);
     shakeMag *= Math.exp(-3.4 * realDt);
+    punch.multiplyScalar(Math.exp(-6.2 * realDt));
     var sx = (Math.random() - 0.5) * 2 * shakeMag;
     var sy = (Math.random() - 0.5) * 2 * shakeMag;
-    camera.position.set(camPos.x + sx, camPos.y + sy, camPos.z);
+    camera.position.set(camPos.x + sx + punch.x, camPos.y + sy + punch.y, camPos.z + punch.z);
     camera.lookAt(lookPos);
     if (ballRoot && ballRoot.visible) {
       var dist = camera.position.distanceTo(ballRoot.position);
@@ -3145,9 +3340,117 @@ button, .card { font-family: inherit; }
       ballSprite.scale.set(bs, bs, 1);
       ballGlow.scale.set(bs * 1.9, bs * 1.9, 1);
     }
-    if (aspect < 1) camera.fov = 54;
-    else camera.fov = aspect > 1.9 ? 36 : 40;
+    var fov = aspect < 1 ? 54 : (aspect > 1.9 ? 36 : 40);
+    if (state.flight && state.flight.big && ballRoot && ballRoot.visible) {
+      fov += clamp(ballRoot.position.y / 7, 0, 1) * 5.5;
+    }
+    camera.fov = fov;
     camera.updateProjectionMatrix();
+  }
+
+  function posePitcher() {
+    if (!pitcher) return;
+    var baseH = pitcher.userData.baseH || 2.45;
+    var aspect = pitcher.userData.aspect || (pitcher.scale.x / Math.max(0.001, pitcher.scale.y));
+    var sy = 1;
+    var sx = 1;
+    var lean = 0;
+    if (state.phase === "windup") {
+      var u = clamp(state.wind / 0.52, 0, 1);
+      if (u < 0.62) {
+        var a = Math.sin((u / 0.62) * Math.PI);
+        sy = 1 - 0.09 * a;
+        sx = 1 + 0.07 * a;
+        lean = -0.05 * a;
+      } else {
+        var b = (u - 0.62) / 0.38;
+        sy = 1 + 0.11 * b;
+        sx = 1 - 0.07 * b;
+        lean = 0.04 * b;
+      }
+    } else if (state.relTimer > 0) {
+      var r = clamp(state.relTimer / 0.18, 0, 1);
+      sy = 1 - 0.08 * r;
+      sx = 1 + 0.1 * r;
+      lean = 0.03 * r;
+    }
+    var bob = (state.phase === "windup" || state.phase === "flight") ? 0 : Math.sin(state.real * 2.2) * 0.03;
+    pitcher.scale.set(baseH * aspect * sx, baseH * sy, 1);
+    pitcher.position.y = (baseH * sy) * 0.5 + bob;
+    pitcher.material.rotation = lean;
+  }
+
+  function updateShadows() {
+    if (!shadowBatter) return;
+    shadowBatter.position.x = batter.position.x;
+    shadowBatter.position.z = batter.position.z + 0.15;
+    shadowPitcher.position.x = pitcher.position.x;
+    shadowPitcher.position.z = pitcher.position.z + 0.05;
+    if (dog) {
+      shadowDog.position.x = dog.position.x;
+      shadowDog.position.z = dog.position.z + 0.35;
+      var excited = state.dogTimer > 0;
+      shadowDog.scale.set(excited ? 1.7 : 2.15, excited ? 0.8 : 0.95, 1);
+    }
+    if (ballRoot && shadowBall) {
+      shadowBall.visible = ballRoot.visible;
+      if (ballRoot.visible) {
+        var bh = ballRoot.position.y;
+        var sc = clamp(0.85 - bh * 0.08, 0.28, 0.9);
+        shadowBall.position.set(ballRoot.position.x, 0.05, ballRoot.position.z);
+        shadowBall.scale.set(sc, sc * 0.62, 1);
+        shadowBall.material.opacity = clamp(0.5 - bh * 0.06, 0.06, 0.48);
+      }
+    }
+    for (var i = 0; i < yardRunners.length; i++) {
+      var r = yardRunners[i];
+      if (!r.shadow && shadowTex && scene) {
+        var m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
+          map: shadowTex, transparent: true, depthWrite: false, fog: false, opacity: 0.65
+        }));
+        m.rotation.x = -Math.PI / 2;
+        m.scale.set(1.45, 0.48, 1);
+        m.visible = false;
+        scene.add(m);
+        r.shadow = m;
+      }
+      if (!r.shadow) continue;
+      var on = r.sprite && r.sprite.visible;
+      r.shadow.visible = !!on;
+      if (on) r.shadow.position.set(r.drawX != null ? r.drawX : r.x, 0.05, YARD_Z + 0.25);
+    }
+  }
+
+  function applyParallax() {
+    var dx = camPos.x - camBase.x;
+    var dy = camPos.y - camBase.y;
+    var drift = Math.sin(state.real * 0.18) * 0.15;
+    if (skyDay) {
+      skyDay.position.x = (skyDay.userData.baseX || 0) + drift * 0.35 + dx * 0.06;
+      if (skyNight) skyNight.position.x = skyDay.position.x;
+    }
+    if (houses && houses.userData.base) {
+      houses.position.x = houses.userData.base.x + dx * 0.2 + drift;
+      houses.position.y = houses.userData.base.y + dy * 0.04;
+    }
+    if (tree && tree.userData.base) {
+      tree.position.x = tree.userData.base.x + dx * 0.42 + drift * 1.5;
+    }
+    if (crowd && crowd.userData.base) {
+      var cheer = state.cheer || 0;
+      var bob = Math.sin(state.real * 1.8) * (0.03 + cheer * 0.055);
+      var hop = Math.abs(Math.sin(state.real * 7.2)) * cheer * 0.09;
+      crowd.position.x = crowd.userData.base.x + dx * 0.34 + drift * 1.2;
+      crowd.position.y = crowd.userData.base.y + bob + hop + dy * 0.06;
+      var s = 1 + cheer * 0.03;
+      crowd.scale.set(crowd.userData.baseW * s, crowd.userData.baseH * (1 + hop * 0.12) * (1 + cheer * 0.02), 1);
+    }
+    if (godrays) {
+      godrays.material.opacity = (0.4 + Math.sin(state.real * 0.4) * 0.06) * (1 - nightK);
+      godrays.position.x = -5.5 + Math.sin(state.real * 0.13) * 0.35 + dx * 0.1;
+      godrays.position.y = 11.2 + dy * 0.08;
+    }
+    if (haze) haze.material.opacity = 0.12 + nightK * 0.05;
   }
 
   /* ---------- boot ---------- */
@@ -3181,6 +3484,14 @@ button, .card { font-family: inherit; }
     add("ball", "art/ball_clean.png", 256);
     add("ballScuff", "art/ball_scuffed.png", 256);
     add("bat", "art/bat.png", 700);
+    add("crowd", "art/crowd_row.png", 1280);
+    add("rays", "art/fx_godrays.png", 1024);
+    add("spark", "art/fx_spark.png", 512);
+    add("dust1", "art/fx_dust_1.png", 384);
+    add("dust2", "art/fx_dust_2.png", 384);
+    add("dust3", "art/fx_dust_3.png", 384);
+    add("dust4", "art/fx_dust_4.png", 384);
+    add("plate", "art/plate_box.png", 900);
     for (var i = 0; i < KIDS.length; i++) add(KIDS[i].id, "art/char_" + KIDS[i].id + "_batless.png", 768);
     jobs.push(fetch("art/bat_poses.json").then(function (r) { return r.json(); }).then(function (j) { batPoses = j; }));
     for (var w = 1; w <= 6; w++) add("w" + w, "art/window_" + w + ".png", 360);
