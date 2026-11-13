@@ -523,19 +523,24 @@ button, .card { font-family: inherit; }
   overflow: hidden;
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.7);
 }
+.sweet-label {
+  text-align: center;
+  color: #fff6b0;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin: 0 0 3px;
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  pointer-events: none;
+}
 .sweet {
   position: absolute;
   top: 0;
   bottom: 0;
   background: linear-gradient(#8ee08a, #3aaa55);
-  display: grid;
-  place-items: center;
-  color: #fff6b0;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 1px;
-  -webkit-text-stroke: 3px var(--ink);
-  paint-order: stroke fill;
+  z-index: 1;
 }
 .needle {
   position: absolute;
@@ -543,6 +548,7 @@ button, .card { font-family: inherit; }
   bottom: -4px;
   width: 0;
   left: 0%;
+  z-index: 2;
 }
 .needle i {
   position: absolute;
@@ -675,7 +681,7 @@ button, .card { font-family: inherit; }
 }
 #flash {
   z-index: 4;
-  background: #fff4cf;
+  background: #fffaf0;
   opacity: 0;
 }
 @media (orientation: portrait) {
@@ -714,6 +720,7 @@ button, .card { font-family: inherit; }
   .plate .who { font-size: 15px; }
   .score-pill strong { font-size: 26px; }
   .tap-label { font-size: 16px; }
+  .sweet-label { font-size: 10px; margin-bottom: 1px; -webkit-text-stroke: 2px var(--ink); }
   .meter { height: 22px; }
   .btn { min-height: 44px; font-size: 16px; padding: 8px 12px; }
   .card { padding: 3px 4px 4px; }
@@ -856,8 +863,9 @@ button, .card { font-family: inherit; }
         <button type="button" data-aim="right">RIGHT</button>
       </div>
       <div class="meter-wrap">
+        <div class="sweet-label" id="sweet-label">SWEET</div>
         <div class="meter" id="meter">
-          <div class="sweet" id="sweet">SWEET</div>
+          <div class="sweet" id="sweet"></div>
           <div class="needle" id="needle"><i></i><b></b></div>
         </div>
       </div>
@@ -1428,7 +1436,7 @@ button, .card { font-family: inherit; }
   var particles = [];
   var dustTex, sparkTex, shadowTex;
   var dustFrames = [];
-  var crowd, godrays, plateDecal, haze;
+  var crowdTiles = [], godrays = [], plateDecal, haze;
   var shadowBatter, shadowPitcher, shadowDog, shadowBall;
   var punch = new THREE.Vector3();
   var gradMap;
@@ -1443,6 +1451,9 @@ button, .card { font-family: inherit; }
   var hemi, sun, fill, winLights = [];
   var tmp = new THREE.Vector3();
   var shownScore = 0;
+  var scoreFrom = 0;
+  var scoreTo = 0;
+  var scoreT = 1;
 
   function isPOT(n) { return n > 0 && (n & (n - 1)) === 0; }
 
@@ -1516,6 +1527,34 @@ button, .card { font-family: inherit; }
     var mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: true, alphaTest: 0.35, fog: false });
     var mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
     return mesh;
+  }
+
+  function buildCrowd() {
+    var img = textures.crowd.image;
+    var aspect = img.width / Math.max(1, img.height);
+    var h = 0.98;
+    var tileW = h * aspect;
+    var fenceW = 34;
+    var left = 0.2 - fenceW * 0.5;
+    var n = Math.max(1, Math.round(fenceW / tileW));
+    var step = fenceW / n;
+    var fenceTop = 0.92 + 1.85 * 0.5;
+    for (var i = 0; i < n; i++) {
+      var tile = plane(textures.crowd, 1, 1);
+      var mirror = (i % 2) ? -1 : 1;
+      var fit = 0.94 + ((i * 5) % 4) * 0.02;
+      var th = h * fit;
+      var tw = th * aspect;
+      tile.scale.set(tw * mirror, th, 1);
+      tile.position.set(left + step * (i + 0.5), fenceTop + th * 0.06, FENCE_Z - 0.18);
+      tile.userData.baseX = tile.position.x;
+      tile.userData.baseY = tile.position.y;
+      tile.userData.phase = i * 0.85;
+      tile.material.alphaTest = 0.22;
+      tile.material.depthWrite = true;
+      scene.add(tile);
+      crowdTiles.push(tile);
+    }
   }
 
   function fitHeight(mesh, tex, height) {
@@ -1763,22 +1802,28 @@ button, .card { font-family: inherit; }
     tree.userData.base = tree.position.clone();
     scene.add(tree);
 
-    crowd = plane(textures.crowd, 9.4, 2.58);
-    crowd.position.set(0.15, 1.52, -16.85);
-    crowd.userData.base = crowd.position.clone();
-    crowd.userData.baseW = 9.4;
-    crowd.userData.baseH = 2.58;
-    crowd.material.alphaTest = 0.18;
-    crowd.material.depthWrite = true;
-    scene.add(crowd);
+    buildCrowd();
 
-    godrays = plane(textures.rays, 24, 13.5);
-    godrays.position.set(-5.5, 11.2, -30);
-    godrays.material.alphaTest = 0.02;
-    godrays.material.depthWrite = false;
-    godrays.material.opacity = 0.48;
-    godrays.renderOrder = -1;
-    scene.add(godrays);
+    var rayImg = textures.rays.image;
+    var rayAspect = rayImg.width / Math.max(1, rayImg.height);
+    var rayW = 34;
+    function addRays(x, y, opacity) {
+      var mesh = plane(textures.rays, rayW, rayW / rayAspect);
+      mesh.position.set(x, y, -33);
+      mesh.material.alphaTest = 0;
+      mesh.material.depthWrite = false;
+      mesh.material.depthTest = true;
+      mesh.material.blending = THREE.AdditiveBlending;
+      mesh.material.opacity = opacity;
+      mesh.userData.baseX = x;
+      mesh.userData.baseY = y;
+      mesh.userData.baseOp = opacity;
+      mesh.renderOrder = -1;
+      scene.add(mesh);
+      godrays.push(mesh);
+    }
+    addRays(-10.2, 8.5, 0.72);
+    addRays(1.8, 10.2, 0.58);
 
     plateDecal = plane(textures.plate, 4.2, 2.54);
     plateDecal.rotation.x = -Math.PI / 2;
@@ -2038,10 +2083,11 @@ button, .card { font-family: inherit; }
   function flashHit(power) {
     var n = el("flash");
     if (!n) return;
+    var peak = Math.min(0.12, power || 0.06);
     n.style.transition = "none";
-    n.style.opacity = String(power || 0.22);
+    n.style.opacity = String(peak);
     requestAnimationFrame(function () {
-      n.style.transition = "opacity 0.34s ease";
+      n.style.transition = "opacity 0.07s linear";
       n.style.opacity = "0";
     });
   }
@@ -2419,6 +2465,9 @@ button, .card { font-family: inherit; }
     state.u = 0;
     state.gap = 0;
     shownScore = 0;
+    scoreFrom = 0;
+    scoreTo = 0;
+    scoreT = 1;
     state.scoreShown = 0;
     state.lastTarget = 0;
     state.cheer = 0;
@@ -2707,7 +2756,7 @@ button, .card { font-family: inherit; }
       if (result.kind === "foul") {
         punch.set(0.03, 0.04, 0.06);
         shakeMag = Math.max(shakeMag, 0.1);
-        flashHit(0.12);
+        flashHit(0.05);
       }
       startFoulFlight(result.kind === "foul");
       noteYardPitch(false, false, 0);
@@ -2768,7 +2817,7 @@ button, .card { font-family: inherit; }
     showCallout(title, sub, !isHr);
     punch.set((Math.random() - 0.5) * 0.05, juicy ? 0.11 : 0.06, juicy ? 0.18 : 0.1);
     shakeMag = Math.max(shakeMag, juicy ? 0.26 : 0.14);
-    flashHit(juicy ? 0.4 : 0.18);
+    flashHit(juicy ? 0.11 : 0.06);
     state.cheer = Math.max(state.cheer, juicy ? 1.35 : 0.4);
     if (isHr) {
       sfxCheer();
@@ -3220,17 +3269,27 @@ button, .card { font-family: inherit; }
 
     var target = currentPlayer() ? currentPlayer().score : 0;
     if (ui.screen === "hud") {
-      if (target > (state.lastTarget || 0)) {
-        var pill = el("score-pill");
-        if (pill) {
-          pill.classList.remove("bump");
-          void pill.offsetWidth;
-          pill.classList.add("bump");
+      if (target !== scoreTo) {
+        scoreFrom = shownScore;
+        scoreTo = target;
+        scoreT = 0;
+        if (target > (state.lastTarget || 0)) {
+          var pill = el("score-pill");
+          if (pill) {
+            pill.classList.remove("bump");
+            void pill.offsetWidth;
+            pill.classList.add("bump");
+          }
         }
       }
       state.lastTarget = target;
-      shownScore = lerp(shownScore, target, 1 - Math.pow(0.001, realDt));
-      if (Math.abs(shownScore - target) < 1) shownScore = target;
+      if (shownScore !== target) {
+        scoreT += realDt;
+        var su = clamp(scoreT / 0.22, 0, 1);
+        var se = 1 - Math.pow(1 - su, 3);
+        shownScore = scoreFrom + (scoreTo - scoreFrom) * se;
+        if (su >= 1 || Math.abs(shownScore - target) < 0.5) shownScore = target;
+      }
       el("hud-score").textContent = fmt(shownScore);
     }
   }
@@ -3436,19 +3495,21 @@ button, .card { font-family: inherit; }
     if (tree && tree.userData.base) {
       tree.position.x = tree.userData.base.x + dx * 0.42 + drift * 1.5;
     }
-    if (crowd && crowd.userData.base) {
-      var cheer = state.cheer || 0;
-      var bob = Math.sin(state.real * 1.8) * (0.03 + cheer * 0.055);
-      var hop = Math.abs(Math.sin(state.real * 7.2)) * cheer * 0.09;
-      crowd.position.x = crowd.userData.base.x + dx * 0.34 + drift * 1.2;
-      crowd.position.y = crowd.userData.base.y + bob + hop + dy * 0.06;
-      var s = 1 + cheer * 0.03;
-      crowd.scale.set(crowd.userData.baseW * s, crowd.userData.baseH * (1 + hop * 0.12) * (1 + cheer * 0.02), 1);
+    var cheer = state.cheer || 0;
+    for (var ci = 0; ci < crowdTiles.length; ci++) {
+      var tile = crowdTiles[ci];
+      var ph = tile.userData.phase || 0;
+      var bob = Math.sin(state.real * 1.7 + ph) * (0.012 + cheer * 0.035);
+      var hop = Math.abs(Math.sin(state.real * 6.4 + ph)) * cheer * 0.055;
+      tile.position.x = tile.userData.baseX + dx * 0.2 + drift * 0.35;
+      tile.position.y = tile.userData.baseY + bob + hop + dy * 0.02;
     }
-    if (godrays) {
-      godrays.material.opacity = (0.4 + Math.sin(state.real * 0.4) * 0.06) * (1 - nightK);
-      godrays.position.x = -5.5 + Math.sin(state.real * 0.13) * 0.35 + dx * 0.1;
-      godrays.position.y = 11.2 + dy * 0.08;
+    var rayPulse = 0.94 + Math.sin(state.real * 0.35) * 0.06;
+    for (var gi = 0; gi < godrays.length; gi++) {
+      var ray = godrays[gi];
+      ray.material.opacity = ray.userData.baseOp * rayPulse * (1 - nightK);
+      ray.position.x = ray.userData.baseX + Math.sin(state.real * 0.12 + gi) * 0.18 + dx * 0.06;
+      ray.position.y = ray.userData.baseY + dy * 0.04;
     }
     if (haze) haze.material.opacity = 0.12 + nightK * 0.05;
   }
